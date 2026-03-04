@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-cream text-charcoal font-body;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 bg-clay text-white rounded-full text-sm font-medium 
+           hover:bg-earth transition-colors duration-200;
+  }
+  .btn-outline {
+    @apply px-4 py-2 border-2 border-clay text-charcoal rounded-full text-sm 
+           hover:bg-sand transition-colors duration-200;
+  }
+  .card-base {
+    @apply bg-warm-white border border-sand rounded-2xl transition-all duration-200
+           hover:shadow-lg hover:-translate-y-1;
+  }
+  .tag { @apply inline-block px-3 py-0.5 rounded-full text-xs font-medium; }
+  .tag-strong { @apply tag bg-orange-100 text-clay; }
+  .tag-moderate { @apply tag bg-green-100 text-moss; }
+  .tag-gentle { @apply tag bg-amber-50 text-earth; }
+}
