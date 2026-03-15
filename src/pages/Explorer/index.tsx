@@ -2,15 +2,12 @@ import { useState } from 'react'
 import { useAppStore } from '../../store/useAppStore'
 import { useAuth } from '../../context/AuthContext'
 import MuscleCard from '../../components/MuscleCard'
-import PoseCard from '../../components/PoseCard'
 import SearchBar from '../../components/SearchBar'
 import FilterPanel from '../../components/FilterPanel'
-import ProtectedContent from '../../components/ProtectedContent'
 import AuthModal from '../../components/AuthModal'
 import type { Muscle, BodyRegion } from '../../types'
 
-// Muscles/poses marked is_premium: true will be gated
-const PREMIUM_MUSCLE_IDS = new Set(['adductors', 'erector_spinae']) // example — add future ones here
+const PREMIUM_MUSCLE_IDS = new Set(['adductors', 'erector_spinae'])
 
 export default function Explorer() {
   const {
@@ -38,60 +35,53 @@ export default function Explorer() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8">
-
-      {/* ── Sidebar ── */}
+      {/* Sidebar */}
       <aside className="space-y-4">
         <p className="text-xs tracking-widest uppercase text-clay font-mono">Browse Muscles</p>
-
         <SearchBar
           value={muscleFilters.searchQuery}
           onChange={setMuscleSearch}
           placeholder="Search muscles…"
         />
-
         <FilterPanel
           activeRegion={muscleFilters.region}
           onRegionChange={(r) => setMuscleRegion(r as BodyRegion | 'All')}
         />
-
         <div className="space-y-2 max-h-[65vh] overflow-y-auto pr-1">
           {filteredMuscles.length === 0 ? (
             <p className="text-center text-earth/60 py-8 text-sm">No muscles found</p>
           ) : (
             filteredMuscles.map(muscle => {
               const locked = isPremiumMuscle(muscle.id) && !isAuthenticated
-              return (
-                <div key={muscle.id} className="relative">
-                  {locked ? (
-                    <div
-                      onClick={() => { setAuthReason('to access all muscles'); setShowAuthModal(true) }}
-                      className="w-full text-left p-4 rounded-xl border border-sand bg-warm-white cursor-pointer hover:border-clay transition-all opacity-70"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-semibold text-sm text-charcoal">{muscle.name}</span>
-                        <span className="text-xs bg-clay/10 text-clay px-2 py-0.5 rounded-full">🔒 Members</span>
-                      </div>
-                      <p className="text-xs text-earth/50 mt-1">{muscle.area}</p>
-                    </div>
-                  ) : (
-                    <MuscleCard
-                      muscle={muscle}
-                      onClick={handleSelectMuscle}
-                      isActive={selectedMuscle?.id === muscle.id}
-                    />
-                  )}
+              return locked ? (
+                <div
+                  key={muscle.id}
+                  onClick={() => { setAuthReason('to access all muscles'); setShowAuthModal(true) }}
+                  className="w-full text-left p-4 rounded-xl border border-sand bg-warm-white cursor-pointer hover:border-clay transition-all opacity-70"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-sm text-charcoal">{muscle.name}</span>
+                    <span className="text-xs bg-clay/10 text-clay px-2 py-0.5 rounded-full">🔒 Members</span>
+                  </div>
+                  <p className="text-xs text-earth/50 mt-1">{muscle.area}</p>
                 </div>
+              ) : (
+                <MuscleCard
+                  key={muscle.id}
+                  muscle={muscle}
+                  onClick={handleSelectMuscle}
+                  isActive={selectedMuscle?.id === muscle.id}
+                />
               )
             })
           )}
         </div>
       </aside>
 
-      {/* ── Detail Panel ── */}
+      {/* Detail Panel */}
       <div>
         {selectedMuscle ? (
-          <div className="animate-fade-in">
-            {/* Header */}
+          <div>
             <div className="bg-charcoal rounded-t-2xl p-6 text-cream">
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -99,15 +89,10 @@ export default function Explorer() {
                     {selectedMuscle.area} · {selectedMuscle.region}
                   </p>
                   <h2 className="font-display text-3xl font-normal">{selectedMuscle.name}</h2>
-                  {selectedMuscle.latinName && (
-                    <p className="text-cream/50 text-sm italic mt-0.5">{selectedMuscle.latinName}</p>
-                  )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  {/* Bookmark button */}
                   <button
                     onClick={() => handleBookmark(selectedMuscle.id)}
-                    title={isBookmarked(selectedMuscle.id) ? 'Remove bookmark' : 'Bookmark this muscle'}
                     className={`p-2 rounded-full transition-all ${
                       isBookmarked(selectedMuscle.id)
                         ? 'bg-clay text-white'
@@ -123,11 +108,9 @@ export default function Explorer() {
               </div>
             </div>
 
-            {/* Body */}
             <div className="bg-warm-white border border-sand border-t-0 rounded-b-2xl p-6 space-y-6">
               <p className="text-earth text-sm leading-relaxed">{selectedMuscle.description}</p>
 
-              {/* Anatomy Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-cream rounded-xl p-4">
                   <h4 className="text-xs tracking-widest uppercase text-clay font-mono mb-2">Origin</h4>
@@ -167,7 +150,6 @@ export default function Explorer() {
                 )}
               </div>
 
-              {/* Poses */}
               <div>
                 <h3 className="text-xs tracking-widest uppercase text-clay font-mono mb-3">Activating Poses</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -195,7 +177,6 @@ export default function Explorer() {
                 </div>
               </div>
 
-              {/* Teaching Tip */}
               <div className="bg-gradient-to-r from-moss/8 to-clay/8 border border-moss/20 rounded-xl p-4">
                 <h4 className="font-display text-moss mb-1">🌿 Teaching Tip</h4>
                 <p className="text-sm text-charcoal/80 leading-relaxed">{selectedMuscle.teachingTip}</p>
@@ -218,11 +199,7 @@ export default function Explorer() {
         )}
       </div>
 
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        reason={authReason}
-      />
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} reason={authReason} />
     </div>
   )
 }

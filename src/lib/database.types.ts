@@ -1,6 +1,3 @@
-// Auto-generated Supabase types — regenerate with:
-// npx supabase gen types typescript --project-id YOUR_PROJECT_ID > src/lib/database.types.ts
-
 export type UserRole = 'free' | 'premium' | 'admin'
 
 export interface Database {
@@ -8,7 +5,7 @@ export interface Database {
     Tables: {
       profiles: {
         Row: {
-          id: string               // matches auth.users.id
+          id: string
           email: string
           display_name: string | null
           avatar_url: string | null
@@ -39,21 +36,24 @@ export interface Database {
           created_at: string
         }
         Insert: {
+          id?: string
           user_id: string
           item_type: 'muscle' | 'pose'
           item_id: string
         }
-        Update: never
+        Update: {
+          id?: string
+          user_id?: string
+          item_type?: 'muscle' | 'pose'
+          item_id?: string
+        }
       }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
-    Enums: {
-      user_role: UserRole
-    }
+    Enums: { user_role: UserRole }
   }
 }
 
-// Convenience row types
 export type Profile = Database['public']['Tables']['profiles']['Row']
 export type Bookmark = Database['public']['Tables']['bookmarks']['Row']

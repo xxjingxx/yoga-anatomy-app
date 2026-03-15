@@ -1,15 +1,16 @@
 import { useAppStore } from '../../store/useAppStore'
-import PoseCard from '../../components/PoseCard'
 import SearchBar from '../../components/SearchBar'
+import type { PoseCategory, DifficultyLevel } from '../../types'
 
 const categories = ['All', 'Standing', 'Seated', 'Supine', 'Prone', 'Inversion', 'Arm Balance', 'Backbend', 'Forward Fold', 'Hip Opener', 'Twist'] as const
 const levels = ['All', 'Beginner', 'Intermediate', 'Advanced'] as const
 
 export default function PosesPage() {
-  const { filteredPoses, poseFilters, setPoseSearch, setPoseCategory, setPoseLevel, getMuscleById } = useAppStore()
-  const [selectedPoseId, setSelectedPoseId] = useAppStore(s => [s.selectedPose?.id, s.selectPose])
-
-  const selectedPose = useAppStore(s => s.selectedPose)
+  const {
+    filteredPoses, poseFilters,
+    setPoseSearch, setPoseCategory, setPoseLevel,
+    selectedPose, selectPose, getMuscleById,
+  } = useAppStore()
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-8">
@@ -17,12 +18,11 @@ export default function PosesPage() {
         <p className="text-xs tracking-widest uppercase text-clay font-mono">All Poses</p>
         <SearchBar value={poseFilters.searchQuery} onChange={setPoseSearch} placeholder="Search poses…" />
 
-        {/* Category filter */}
         <div>
           <p className="text-xs text-earth/60 mb-2 uppercase tracking-wider">Category</p>
           <div className="flex flex-wrap gap-1.5">
             {categories.map(c => (
-              <button key={c} onClick={() => setPoseCategory(c as any)}
+              <button key={c} onClick={() => setPoseCategory(c as PoseCategory | 'All')}
                 className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${
                   poseFilters.category === c
                     ? 'border-moss bg-moss/10 text-moss font-medium'
@@ -32,12 +32,11 @@ export default function PosesPage() {
           </div>
         </div>
 
-        {/* Level filter */}
         <div>
           <p className="text-xs text-earth/60 mb-2 uppercase tracking-wider">Level</p>
           <div className="flex gap-1.5">
             {levels.map(l => (
-              <button key={l} onClick={() => setPoseLevel(l as any)}
+              <button key={l} onClick={() => setPoseLevel(l as DifficultyLevel | 'All')}
                 className={`flex-1 py-1.5 rounded-xl text-xs border transition-colors ${
                   poseFilters.level === l
                     ? 'border-clay bg-clay text-white font-medium'
@@ -49,7 +48,7 @@ export default function PosesPage() {
 
         <div className="space-y-2 max-h-[55vh] overflow-y-auto pr-1">
           {filteredPoses.map(pose => (
-            <button key={pose.id} onClick={() => setSelectedPoseId(pose)} className="w-full text-left">
+            <button key={pose.id} onClick={() => selectPose(pose)} className="w-full text-left">
               <div className={`p-3 rounded-xl border transition-all ${
                 selectedPose?.id === pose.id
                   ? 'border-moss bg-moss/10'
@@ -65,7 +64,7 @@ export default function PosesPage() {
 
       <div>
         {selectedPose ? (
-          <div className="animate-fade-in">
+          <div>
             <div className="bg-charcoal rounded-t-2xl p-6 text-cream">
               <p className="text-xs tracking-widest uppercase text-clay/70 font-mono mb-1">
                 {selectedPose.category} · {selectedPose.level}

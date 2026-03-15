@@ -79,6 +79,6 @@ src/
 - [ ] Add remaining 50+ muscles
 - [ ] Add 40+ poses
 - [ ] Quiz mode for YTT students
-- [ ] Supabase backend for user accounts
-- [ ] Bookmark favourite muscles/poses
-- [ ] Deploy to Vercel
+- [x] Supabase backend for user accounts
+- [x] Bookmark favourite muscles/poses
+- [x] Deploy to Vercel

@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useAppStore } from '../../store/useAppStore'
 import { Navigate } from 'react-router-dom'
@@ -14,7 +13,6 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
-      {/* Profile header */}
       <div className="bg-charcoal rounded-2xl p-6 text-cream flex items-center gap-5">
         <div className="w-16 h-16 rounded-full bg-clay flex items-center justify-center text-2xl font-bold shrink-0">
           {profile?.avatar_url
@@ -33,15 +31,11 @@ export default function ProfilePage() {
             {profile?.role || 'free'} account
           </span>
         </div>
-        <button
-          onClick={signOut}
-          className="text-sm text-cream/50 hover:text-red-400 transition-colors shrink-0"
-        >
+        <button onClick={signOut} className="text-sm text-cream/50 hover:text-red-400 transition-colors shrink-0">
           Sign out
         </button>
       </div>
 
-      {/* Bookmarks */}
       <div>
         <h2 className="font-display text-xl text-charcoal mb-4">
           🔖 Bookmarked Muscles
