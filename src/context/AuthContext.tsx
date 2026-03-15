@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .select('*')
       .eq('id', userId)
       .single()
-    if (!error && data) setProfile(data)
+    if (!error && data) setProfile(data as Profile)
   }, [])
 
   const fetchBookmarks = useCallback(async (userId: string) => {
@@ -43,9 +43,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .from('bookmarks')
       .select('item_id')
       .eq('user_id', userId)
-    // Fix: data may be null, guard before mapping
     if (data && data.length > 0) {
-      setBookmarks(new Set(data.map((b) => b.item_id)))
+      // Fix: cast each row to access item_id safely
+      setBookmarks(new Set((data as { item_id: string }[]).map((b) => b.item_id)))
     }
   }, [])
 
@@ -108,7 +108,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const toggleBookmark = async (itemType: 'muscle' | 'pose', itemId: string) => {
     if (!user) return
     if (bookmarks.has(itemId)) {
-      await supabase.from('bookmarks')
+      await supabase
+        .from('bookmarks')
         .delete()
         .eq('user_id', user.id)
         .eq('item_id', itemId)
@@ -118,12 +119,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return next
       })
     } else {
-      // Fix: cast insert payload to correct type
-      await supabase.from('bookmarks').insert({
-        user_id: user.id,
-        item_type: itemType,
-        item_id: itemId,
-      })
+      // Fix: use type assertion to bypass Supabase generic inference issue
+      await (supabase.from('bookmarks') as ReturnType<typeof supabase.from>)
+        .insert({
+          user_id: user.id,
+          item_type: itemType,
+          item_id: itemId,
+        } as never)
       setBookmarks(prev => new Set(prev).add(itemId))
     }
   }
