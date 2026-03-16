@@ -4,6 +4,7 @@ import Layout from './components/Layout'
 import Explorer from './pages/Explorer'
 import PosesPage from './pages/PoseDetail'
 import ProfilePage from './pages/Profile'
+import AIAssistant from './components/AIAssistant'
 
 export default function App() {
   return (
@@ -15,6 +16,8 @@ export default function App() {
           <Route path="/profile" element={<ProfilePage />} />
         </Routes>
       </Layout>
+      {/* AI Assistant floats outside Layout so it stays on top of everything */}
+      <AIAssistant />
     </AuthProvider>
   )
 }
