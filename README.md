@@ -76,9 +76,10 @@ src/
 
 ## Roadmap
 
-- [ ] Add remaining 50+ muscles
 - [ ] Add 40+ poses
 - [ ] Quiz mode for YTT students
 - [x] Supabase backend for user accounts
 - [x] Bookmark favourite muscles/poses
 - [x] Deploy to Vercel
+- [x] Add AI teaching cue assistant
+- [x] Add remaining 50+ muscles
