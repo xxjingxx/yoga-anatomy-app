@@ -1,0 +1,36 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # Runs every 5 days at 8:00 AM UTC
+    # Cron format: minute hour day month weekday
+    - cron: '0 8 */5 * *'
+  workflow_dispatch:
+    # Allows you to trigger this manually from GitHub Actions tab
+
+jobs:
+  ping:
+    name: Ping Supabase to prevent pausing
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ping Supabase REST API
+        run: |
+          echo "Pinging Supabase at $(date)"
+
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${{ secrets.VITE_SUPABASE_URL }}/rest/v1/profiles?limit=1" \
+            -H "apikey: ${{ secrets.VITE_SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.VITE_SUPABASE_ANON_KEY }}")
+
+          echo "Response status: $RESPONSE"
+
+          if [ "$RESPONSE" -eq 200 ] || [ "$RESPONSE" -eq 401 ]; then
+            echo "✅ Supabase is alive and responding"
+          else
+            echo "❌ Unexpected response: $RESPONSE"
+            exit 1
+          fi
+
+      - name: Log success
+        run: echo "Keep-alive ping completed at $(date UTC)"
