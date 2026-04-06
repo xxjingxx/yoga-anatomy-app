@@ -33,20 +33,6 @@ export const poses: Pose[] = [
     ],
   },
   {
-    id: 'downward_facing_dog',
-    name: 'Downward Facing Dog',
-    sanskrit: 'Adho Mukha Svanasana',
-    category: 'Standing',
-    level: 'Beginner',
-    description: 'One of the most recognised yoga poses — a full-body stretch and strengthener that forms a cornerstone of most practices.',
-    breathCue: 'Exhale to press the floor away; inhale to lengthen the spine.',
-    contraindications: ['Carpal tunnel syndrome', 'Late-term pregnancy'],
-    muscleActivations: [
-      { muscleId: 'latissimus_dorsi', activation: 'moderate', notes: 'External rotation of upper arm with pressing into floor engages lats.' },
-      { muscleId: 'hamstrings', activation: 'moderate', notes: 'Hip flexion with straight legs creates hamstring lengthening.' },
-    ],
-  },
-  {
     id: 'locust',
     name: 'Locust Pose',
     sanskrit: 'Salabhasana',
@@ -62,35 +48,6 @@ export const poses: Pose[] = [
     ],
   },
   {
-    id: 'bridge',
-    name: 'Bridge Pose',
-    sanskrit: 'Setu Bandhasana',
-    category: 'Supine',
-    level: 'Beginner',
-    description: 'A supine backbend that opens the chest, strengthens the posterior chain, and stretches the hip flexors.',
-    breathCue: 'Inhale to lift the hips; exhale to maintain the lift and broaden across the chest.',
-    contraindications: ['Neck injuries'],
-    muscleActivations: [
-      { muscleId: 'gluteus_maximus', activation: 'strong', notes: 'Primary mover for hip extension; glute maximus drives the lift.' },
-      { muscleId: 'hamstrings', activation: 'strong', notes: 'Hamstrings strongly activate to extend the hip against gravity.' },
-      { muscleId: 'erector_spinae', activation: 'moderate', notes: 'Spinal extensors maintain the arch of the bridge.' },
-    ],
-  },
-  {
-    id: 'plank',
-    name: 'Plank Pose',
-    sanskrit: 'Phalakasana',
-    category: 'Arm Balance',
-    level: 'Beginner',
-    description: 'The foundational arm balance — builds core strength, shoulder stability, and full-body alignment awareness.',
-    breathCue: 'Breathe slowly and steadily; avoid holding the breath which reduces core stability.',
-    contraindications: ['Wrist injuries', 'Shoulder injuries'],
-    muscleActivations: [
-      { muscleId: 'transverse_abdominis', activation: 'strong', notes: 'Anti-extension demand requires constant deep core activation.' },
-      { muscleId: 'latissimus_dorsi', activation: 'moderate', notes: 'Shoulder flexion against gravity loads lats isometrically.' },
-    ],
-  },
-  {
     id: 'tree',
     name: 'Tree Pose',
     sanskrit: 'Vrksasana',
@@ -102,20 +59,6 @@ export const poses: Pose[] = [
     muscleActivations: [
       { muscleId: 'transverse_abdominis', activation: 'moderate', notes: 'Core subtly activates to maintain upright balance on one leg.' },
       { muscleId: 'quadriceps', activation: 'moderate', notes: 'Standing leg quad stabilises the knee joint.' },
-    ],
-  },
-  {
-    id: 'seated_forward_fold',
-    name: 'Seated Forward Fold',
-    sanskrit: 'Paschimottanasana',
-    category: 'Forward Fold',
-    level: 'Beginner',
-    description: 'A seated forward fold that stretches the entire posterior chain from the heels to the crown of the head.',
-    breathCue: 'Inhale to lengthen the spine; exhale to fold deeper. Never force — let gravity do the work.',
-    contraindications: ['Herniated discs', 'Hamstring tears'],
-    muscleActivations: [
-      { muscleId: 'hamstrings', activation: 'strong', notes: 'Full hamstring length at hip and knee simultaneously.' },
-      { muscleId: 'erector_spinae', activation: 'gentle', notes: 'Erectors eccentrically lengthen as spine flexes forward.' },
     ],
   },
   {
