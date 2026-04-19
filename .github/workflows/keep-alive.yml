@@ -2,9 +2,9 @@ name: Keep Supabase Alive
 
 on:
   schedule:
-    # Runs every 4 days at 8:00 AM UTC
+    # Runs every 3 days at 8:00 AM UTC (buffer before Supabase's 7-day inactivity limit)
     # Cron format: minute hour day month weekday
-    - cron: '0 8 */4 * *'
+    - cron: '0 8 */3 * *'
   workflow_dispatch:
     # Allows you to trigger this manually from GitHub Actions tab
 
@@ -18,17 +18,25 @@ jobs:
         run: |
           echo "Pinging Supabase at $(date)"
 
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
-            "${{ secrets.VITE_SUPABASE_URL }}/rest/v1/profiles?limit=1" \
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            "${{ secrets.VITE_SUPABASE_URL }}/rest/v1/profiles?select=id&limit=1" \
             -H "apikey: ${{ secrets.VITE_SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.VITE_SUPABASE_ANON_KEY }}")
+            -H "Authorization: Bearer ${{ secrets.VITE_SUPABASE_ANON_KEY }}" \
+            -H "Accept: application/json")
 
-          echo "Response status: $RESPONSE"
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | head -1)
 
-          if [ "$RESPONSE" -eq 200 ] || [ "$RESPONSE" -eq 401 ]; then
+          echo "Response status: $HTTP_CODE"
+          echo "Response body: $BODY"
+
+          if [ "$HTTP_CODE" -eq 200 ]; then
             echo "✅ Supabase is alive and responding"
+          elif [ "$HTTP_CODE" -eq 401 ]; then
+            echo "❌ Got 401 - check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY secrets are set correctly"
+            exit 1
           else
-            echo "❌ Unexpected response: $RESPONSE"
+            echo "❌ Unexpected response: $HTTP_CODE"
             exit 1
           fi
 
