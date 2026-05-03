@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAppStore } from '../../store/useAppStore'
+import { useAuth } from '../../context/AuthContext'
+import { supabase } from '../../lib/supabase'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -14,9 +16,7 @@ export default function AIAssistant() {
   const [poseId, setPoseId] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { muscles, poses, getMuscleById, getPoseById } = useAppStore()
-
-  // Read API key from Vite env
-  const apiKey = (import.meta as unknown as { env: Record<string, string> }).env.VITE_ANTHROPIC_API_KEY
+  const { isAuthenticated } = useAuth()
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -77,43 +77,21 @@ Please provide:
     setMessages(updatedMessages)
 
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true',
+      const { data, error } = await supabase.functions.invoke('generate-cue', {
+        body: {
+          systemPrompt: buildSystemPrompt(),
+          messages: updatedMessages.map(m => ({ role: m.role, content: m.content })),
         },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          system: buildSystemPrompt(),
-          messages: updatedMessages.map(m => ({
-            role: m.role,
-            content: m.content,
-          })),
-        }),
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData?.error?.message || `HTTP ${response.status}`)
-      }
+      if (error) throw new Error(error.message)
 
-      const data = await response.json()
-      const assistantContent = data.content?.[0]?.text || 'Sorry, I could not generate a response.'
+      const assistantContent = data?.content?.[0]?.text || 'Sorry, I could not generate a response.'
 
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: assistantContent,
-      }])
+      setMessages(prev => [...prev, { role: 'assistant', content: assistantContent }])
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error'
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: `Error: ${message}`,
-      }])
+      setMessages(prev => [...prev, { role: 'assistant', content: `Error: ${message}` }])
     } finally {
       setLoading(false)
     }
@@ -154,8 +132,17 @@ Please provide:
             <h3 className="font-display text-cream text-lg leading-tight">Teaching Cue Generator</h3>
           </div>
 
+          {/* Auth gate */}
+          {!isAuthenticated && (
+            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center gap-3">
+              <span className="text-3xl">✦</span>
+              <p className="text-sm text-charcoal font-medium">Sign in to use the AI assistant</p>
+              <p className="text-xs text-earth/60">Teaching cues are generated using a secure server — sign in to get started.</p>
+            </div>
+          )}
+
           {/* Selectors — always shown at top */}
-          {messages.length === 0 && (
+          {isAuthenticated && messages.length === 0 && (
             <div className="p-4 border-b border-sand shrink-0 space-y-3">
               <div>
                 <label className="text-xs uppercase tracking-wider text-earth/70 mb-1 block">
@@ -215,50 +202,53 @@ Please provide:
             </div>
           )}
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                  msg.role === 'user'
-                    ? 'bg-clay text-white rounded-br-sm'
-                    : 'bg-cream border border-sand text-charcoal rounded-bl-sm'
-                }`}>
-                  {msg.role === 'assistant'
-                    ? <div className="whitespace-pre-wrap">{msg.content}</div>
-                    : <span className="italic text-white/80 text-xs">
-                        {selectedMuscle?.name} in {selectedPose?.name}
-                      </span>
-                  }
-                </div>
-              </div>
-            ))}
-
-            {/* Typing indicator */}
-            {loading && messages[messages.length - 1]?.role === 'user' && (
-              <div className="flex justify-start">
-                <div className="bg-cream border border-sand rounded-2xl rounded-bl-sm px-4 py-3">
-                  <div className="flex gap-1.5 items-center">
-                    <span className="w-2 h-2 bg-clay/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 bg-clay/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 bg-clay/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          {/* Messages + footer — only rendered when authenticated */}
+          {isAuthenticated && (
+            <>
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {messages.map((msg, i) => (
+                  <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                      msg.role === 'user'
+                        ? 'bg-clay text-white rounded-br-sm'
+                        : 'bg-cream border border-sand text-charcoal rounded-bl-sm'
+                    }`}>
+                      {msg.role === 'assistant'
+                        ? <div className="whitespace-pre-wrap">{msg.content}</div>
+                        : <span className="italic text-white/80 text-xs">
+                            {selectedMuscle?.name} in {selectedPose?.name}
+                          </span>
+                      }
+                    </div>
                   </div>
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
+                ))}
 
-          {/* Generate another cue button */}
-          {messages.length > 0 && (
-            <div className="border-t border-sand p-3 shrink-0">
-              <button
-                onClick={() => { setMessages([]); setMuscleId(''); setPoseId('') }}
-                className="w-full py-2 text-sm text-clay hover:text-earth border border-clay/30 hover:border-clay rounded-xl transition-colors"
-              >
-                ← Generate another cue
-              </button>
-            </div>
+                {/* Typing indicator */}
+                {loading && messages[messages.length - 1]?.role === 'user' && (
+                  <div className="flex justify-start">
+                    <div className="bg-cream border border-sand rounded-2xl rounded-bl-sm px-4 py-3">
+                      <div className="flex gap-1.5 items-center">
+                        <span className="w-2 h-2 bg-clay/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="w-2 h-2 bg-clay/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <span className="w-2 h-2 bg-clay/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {messages.length > 0 && (
+                <div className="border-t border-sand p-3 shrink-0">
+                  <button
+                    onClick={() => { setMessages([]); setMuscleId(''); setPoseId('') }}
+                    className="w-full py-2 text-sm text-clay hover:text-earth border border-clay/30 hover:border-clay rounded-xl transition-colors"
+                  >
+                    ← Generate another cue
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
