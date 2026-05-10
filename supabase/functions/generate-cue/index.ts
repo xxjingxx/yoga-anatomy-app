@@ -29,6 +29,23 @@ serve(async (req) => {
       return json({ error: 'Unauthorized' }, 401)
     }
 
+    // Check per-user rate limit (atomic check + increment in one RPC call)
+    const { data: rateLimit, error: rateLimitError } = await supabase.rpc(
+      'check_and_increment_rate_limit',
+      { p_user_id: user.id },
+    )
+
+    if (rateLimitError) {
+      return json({ error: 'Rate limit check failed' }, 500)
+    }
+
+    if (!rateLimit.allowed) {
+      return json(
+        { error: `Rate limit exceeded: ${rateLimit.count}/${rateLimit.limit} requests this hour` },
+        429,
+      )
+    }
+
     const { systemPrompt, messages } = await req.json()
 
     const apiKey = Deno.env.get('ANTHROPIC_API_KEY')
