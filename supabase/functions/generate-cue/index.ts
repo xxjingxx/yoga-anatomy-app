@@ -29,7 +29,34 @@ serve(async (req) => {
       return json({ error: 'Unauthorized' }, 401)
     }
 
-    // Check per-user rate limit (atomic check + increment in one RPC call)
+    const { muscleId, poseId, systemPrompt, messages } = await req.json()
+
+    // Service role client — used for cache reads/writes only.
+    // Users cannot reach this table directly (RLS enabled, no policies).
+    const admin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+    )
+
+    // Cache applies only to the first turn (initial cue generation).
+    // Follow-up conversation messages are unique per user and not cached.
+    const isFirstTurn = messages.length === 1
+    const cacheKey = `${muscleId}:${poseId}`
+
+    if (isFirstTurn) {
+      const { data: cached } = await admin
+        .from('ai_response_cache')
+        .select('response')
+        .eq('cache_key', cacheKey)
+        .single()
+
+      if (cached) {
+        // Cache hit — return immediately, no rate limit consumed, no Anthropic call
+        return json({ content: [{ text: cached.response }], cached: true })
+      }
+    }
+
+    // Cache miss — check rate limit before calling Anthropic
     const { data: rateLimit, error: rateLimitError } = await supabase.rpc(
       'check_and_increment_rate_limit',
       { p_user_id: user.id },
@@ -45,8 +72,6 @@ serve(async (req) => {
         429,
       )
     }
-
-    const { systemPrompt, messages } = await req.json()
 
     const apiKey = Deno.env.get('ANTHROPIC_API_KEY')
     if (!apiKey) {
@@ -72,6 +97,14 @@ serve(async (req) => {
 
     if (!upstream.ok) {
       return json({ error: data?.error?.message ?? `Anthropic error ${upstream.status}` }, 502)
+    }
+
+    // Store first-turn responses in cache for future users
+    if (isFirstTurn) {
+      const responseText = data.content?.[0]?.text
+      if (responseText) {
+        await admin.from('ai_response_cache').insert({ cache_key: cacheKey, response: responseText })
+      }
     }
 
     return json(data)

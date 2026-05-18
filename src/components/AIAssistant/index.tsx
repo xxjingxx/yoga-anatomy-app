@@ -79,6 +79,8 @@ Please provide:
     try {
       const { data, error } = await supabase.functions.invoke('generate-cue', {
         body: {
+          muscleId,
+          poseId,
           systemPrompt: buildSystemPrompt(),
           messages: updatedMessages.map(m => ({ role: m.role, content: m.content })),
         },
