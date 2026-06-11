@@ -21,7 +21,7 @@ jobs:
           RESPONSE=$(curl -s -w "\n%{http_code}" \
             "${{ secrets.VITE_SUPABASE_URL }}/rest/v1/profiles?select=id&limit=1" \
             -H "apikey: ${{ secrets.VITE_SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.VITE_SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
             -H "Accept: application/json")
 
           HTTP_CODE=$(echo "$RESPONSE" | tail -1)
