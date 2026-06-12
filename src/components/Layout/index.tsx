@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import AuthModal from '../AuthModal'
+import ErrorBoundary from '../ErrorBoundary'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation()
@@ -49,6 +50,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               ))}
             </nav>
 
+            <ErrorBoundary name="Auth" fallback={<span className="text-sm text-earth">–</span>}>
             {isAuthenticated ? (
               <div className="relative">
                 <button
@@ -103,12 +105,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 Sign in
               </button>
             )}
+            </ErrorBoundary>
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {children}
+        <ErrorBoundary name="Main">
+          {children}
+        </ErrorBoundary>
       </main>
 
       <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
