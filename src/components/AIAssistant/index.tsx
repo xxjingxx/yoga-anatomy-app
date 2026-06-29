@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { FunctionsHttpError } from '@supabase/supabase-js'
 import { useAppStore } from '../../store/useAppStore'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../lib/supabase'
@@ -98,7 +99,12 @@ Please provide:
             messages: updatedMessages.map(m => ({ role: m.role, content: m.content })),
           },
         })
-        if (error) throw new Error(error.message)
+        if (error) {
+          const body = error instanceof FunctionsHttpError
+            ? await error.context.json().catch(() => ({}))
+            : {}
+          throw new Error(body?.error ?? error.message)
+        }
         return data
       })
 
@@ -218,7 +224,6 @@ Please provide:
             </div>
           )}
 
-          {/* Messages + footer — only rendered when authenticated */}
           {isAuthenticated && (
             <>
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
