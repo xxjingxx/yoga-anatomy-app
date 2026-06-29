@@ -3,6 +3,18 @@ import { useAppStore } from '../../store/useAppStore'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../lib/supabase'
 
+async function fetchWithRetry<T>(fn: () => Promise<T>, retries = 2): Promise<T> {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      return await fn()
+    } catch (err) {
+      if (i === retries) throw err
+      await new Promise(res => setTimeout(res, 300 * 2 ** i))
+    }
+  }
+  throw new Error('unreachable')
+}
+
 interface Message {
   role: 'user' | 'assistant'
   content: string
@@ -77,16 +89,18 @@ Please provide:
     setMessages(updatedMessages)
 
     try {
-      const { data, error } = await supabase.functions.invoke('generate-cue', {
-        body: {
-          muscleId,
-          poseId,
-          systemPrompt: buildSystemPrompt(),
-          messages: updatedMessages.map(m => ({ role: m.role, content: m.content })),
-        },
+      const data = await fetchWithRetry(async () => {
+        const { data, error } = await supabase.functions.invoke('generate-cue', {
+          body: {
+            muscleId,
+            poseId,
+            systemPrompt: buildSystemPrompt(),
+            messages: updatedMessages.map(m => ({ role: m.role, content: m.content })),
+          },
+        })
+        if (error) throw new Error(error.message)
+        return data
       })
-
-      if (error) throw new Error(error.message)
 
       const assistantContent = data?.content?.[0]?.text || 'Sorry, I could not generate a response.'
 
