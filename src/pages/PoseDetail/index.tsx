@@ -1,6 +1,4 @@
-import { useMemo } from 'react'
 import { useAppStore } from '../../store/useAppStore'
-import { poses } from '../../data/poses'
 import SearchBar from '../../components/SearchBar'
 import type { PoseCategory, DifficultyLevel } from '../../types'
 
@@ -9,19 +7,10 @@ const levels = ['All', 'Beginner', 'Intermediate', 'Advanced'] as const
 
 export default function PosesPage() {
   const {
-    poseFilters,
+    filteredPoses, poseFilters,
     setPoseSearch, setPoseCategory, setPoseLevel,
     selectedPose, selectPose, getMuscleById,
   } = useAppStore()
-
-  const filteredPoses = useMemo(() => poses.filter(p => {
-    const matchesCategory = poseFilters.category === 'All' || p.category === poseFilters.category
-    const matchesLevel = poseFilters.level === 'All' || p.level === poseFilters.level
-    const matchesSearch = !poseFilters.searchQuery ||
-      p.name.toLowerCase().includes(poseFilters.searchQuery.toLowerCase()) ||
-      p.sanskrit.toLowerCase().includes(poseFilters.searchQuery.toLowerCase())
-    return matchesCategory && matchesLevel && matchesSearch
-  }), [poseFilters])
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-8">

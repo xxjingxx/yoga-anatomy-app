@@ -48,6 +48,101 @@ export interface Database {
           item_id?: string
         }
       }
+      muscles: {
+        Row: {
+          id: string
+          name: string
+          latin_name: string | null
+          region: string
+          area: string
+          origin: string[]
+          insertion: string[]
+          actions: string[]
+          antagonists: string[] | null
+          innervation: string | null
+          description: string
+          teaching_tip: string
+        }
+        Insert: {
+          id: string
+          name: string
+          latin_name?: string | null
+          region: string
+          area: string
+          origin: string[]
+          insertion: string[]
+          actions: string[]
+          antagonists?: string[] | null
+          innervation?: string | null
+          description: string
+          teaching_tip: string
+        }
+        Update: {
+          name?: string
+          latin_name?: string | null
+          region?: string
+          area?: string
+          origin?: string[]
+          insertion?: string[]
+          actions?: string[]
+          antagonists?: string[] | null
+          innervation?: string | null
+          description?: string
+          teaching_tip?: string
+        }
+      }
+      poses: {
+        Row: {
+          id: string
+          name: string
+          sanskrit: string
+          category: string
+          level: string
+          description: string
+          breath_cue: string | null
+          contraindications: string[] | null
+        }
+        Insert: {
+          id: string
+          name: string
+          sanskrit: string
+          category: string
+          level: string
+          description: string
+          breath_cue?: string | null
+          contraindications?: string[] | null
+        }
+        Update: {
+          name?: string
+          sanskrit?: string
+          category?: string
+          level?: string
+          description?: string
+          breath_cue?: string | null
+          contraindications?: string[] | null
+        }
+      }
+      muscle_pose_activations: {
+        Row: {
+          muscle_id: string
+          pose_id: string
+          activation: string
+          muscle_cue: string | null
+          pose_notes: string | null
+        }
+        Insert: {
+          muscle_id: string
+          pose_id: string
+          activation: string
+          muscle_cue?: string | null
+          pose_notes?: string | null
+        }
+        Update: {
+          activation?: string
+          muscle_cue?: string | null
+          pose_notes?: string | null
+        }
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
